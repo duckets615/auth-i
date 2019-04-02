@@ -68,4 +68,34 @@ server.post('/login', (req, res) => {
     })
 })
 
+server.get('/users', protected, (req, res) => {
+  db('users')
+    //.select('id', 'username', 'password')
+    .then(users => {
+      res.json(users);
+    })
+    .catch(err => res.send(err));
+});
+
+function protected(req, res, next) {
+  if (req.session && req.session.username) {
+    next();
+  } else {
+    res.status(401).json({ message: 'Nope, its not cool to show you that' })
+  }
+}
+
+server.get('/logout', (req, res) => {
+  if (req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        res.send('Error logged out', err)
+      } else {
+        res.send('Adios')
+      }
+    })
+  }
+})
+
+
 server.listen(port, () => console.log(`\n==  Project rolling on port ${port} ==\n`))
